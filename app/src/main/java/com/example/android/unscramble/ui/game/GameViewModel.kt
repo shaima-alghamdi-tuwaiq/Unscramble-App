@@ -1,6 +1,8 @@
 package com.example.android.unscramble.ui.game
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 // Data, UI state
@@ -10,14 +12,14 @@ class GameViewModel : ViewModel() {
 
     // data
     // local
-    private var _score = 0
+    private var _score = MutableLiveData(0)
     // global
-    val score : Int get() = _score
+    val score : LiveData<Int> get() = _score
 
     // local
-    private var _currentWordCount = 0
+    private var _currentWordCount = MutableLiveData(0)
     // global
-    val currentWordCount : Int get() = _currentWordCount
+    val currentWordCount : LiveData<Int> get() = _currentWordCount
 
     // backing property in kotlin
     // counting the words solved
@@ -32,9 +34,9 @@ class GameViewModel : ViewModel() {
     val count : Int get() = _count
 
     // local
-    private lateinit var _currentScrambledWord : String
+    private var _currentScrambledWord = MutableLiveData<String>()
     // global
-    val currentScrambledWord : String get() = _currentScrambledWord
+    val currentScrambledWord : LiveData<String> get() = _currentScrambledWord
 
     // LIST OF WORDS ALREADY USED
     private var wordList : MutableList<String> = mutableListOf()
@@ -66,8 +68,8 @@ class GameViewModel : ViewModel() {
         if(wordList.contains(currentWord)){
             getNextWord()
         } else {
-            _currentScrambledWord = String(temptWord)
-            ++_currentWordCount
+            _currentScrambledWord.value = String(temptWord)
+            _currentWordCount.value = (_currentWordCount.value)?.inc()
             // add the solved word to the list
             wordList.add(currentWord)
         }
@@ -76,8 +78,8 @@ class GameViewModel : ViewModel() {
 
     // restart game
     fun reinitializeData(){
-        _score = 0
-        _currentWordCount = 0
+        _score.value = 0
+        _currentWordCount.value = 0
         wordList.clear()
         getNextWord()
     }
@@ -85,7 +87,7 @@ class GameViewModel : ViewModel() {
     // Helper function - get next word or not?
     // finish the level if word is 10
     fun nextWord() : Boolean{
-        return if (currentWordCount < MAX_NO_OF_WORDS){
+        return if (currentWordCount.value!! < MAX_NO_OF_WORDS){
             getNextWord()
             true
         } else false
@@ -93,7 +95,7 @@ class GameViewModel : ViewModel() {
 
     // update score
     private fun increaseScore(){
-        _score += SCORE_INCREASE
+        _score.value = (_score.value)?.plus(SCORE_INCREASE)
     }
 
     // check if word correct + update score
@@ -103,12 +105,5 @@ class GameViewModel : ViewModel() {
             return true
         }
         return false
-    }
-
-
-    // ViewModel Lifecycle Function
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("GameFragment","GameViewModel cleared!")
     }
 }
