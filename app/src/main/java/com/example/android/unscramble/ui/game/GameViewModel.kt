@@ -3,6 +3,7 @@ package com.example.android.unscramble.ui.game
 import android.util.Log
 import androidx.lifecycle.ViewModel
 
+// Data, UI state
 class GameViewModel : ViewModel() {
 
     // ========================== DATA SECTION ====================
@@ -35,8 +36,6 @@ class GameViewModel : ViewModel() {
     // global
     val currentScrambledWord : String get() = _currentScrambledWord
 
-
-
     // LIST OF WORDS ALREADY USED
     private var wordList : MutableList<String> = mutableListOf()
 
@@ -52,7 +51,7 @@ class GameViewModel : ViewModel() {
 
     // ================== LOGIC TO UPDATE UI ======================
 
-    // NEXT WORD
+    // GENERATE NEXT WORD
     private fun getNextWord(){
         currentWord = allWordsList.random()
         val temptWord = currentWord.toCharArray()
@@ -74,9 +73,13 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("GameFragment","GameViewModel cleared!")
+
+    // restart game
+    fun reinitializeData(){
+        _score = 0
+        _currentWordCount = 0
+        wordList.clear()
+        getNextWord()
     }
 
     // Helper function - get next word or not?
@@ -86,5 +89,26 @@ class GameViewModel : ViewModel() {
             getNextWord()
             true
         } else false
+    }
+
+    // update score
+    private fun increaseScore(){
+        _score += SCORE_INCREASE
+    }
+
+    // check if word correct + update score
+    fun isUserWordCorrect(playerWord:  String): Boolean{
+        if (playerWord.equals(currentWord, true)){
+            increaseScore()
+            return true
+        }
+        return false
+    }
+
+
+    // ViewModel Lifecycle Function
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("GameFragment","GameViewModel cleared!")
     }
 }
